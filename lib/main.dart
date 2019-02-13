@@ -34,13 +34,55 @@ class Virtues extends StatefulWidget {
 class _VirtuesState extends State<Virtues> {
   @override
   Widget build(BuildContext context) {
+    var futurebuilder = FutureBuilder(
+      future: _getData(),
+      builder: (BuildContext context, AsyncSnapshot snapshot) {
+        switch (snapshot.connectionState) {
+          case ConnectionState.none:
+          //return Text("Press button to start");
+          case ConnectionState.waiting:
+            return Text("Loading...");
+          default:
+            if (snapshot.hasError)
+              return Text("Error: ${snapshot.error}");
+            else
+              //return Text("Result: ${snapshot.data}");
+              return createListView(context, snapshot);
+        }
+      },
+    );
+
     return Scaffold(
       appBar: AppBar(
         title: Text("Virtues"),
       ),
-      body: Container(
-        child: FlutterLogo(),
-      ),
+      body: Center(child: futurebuilder),
+    );
+  }
+
+  Future<List<String>> _getData() async {
+    var values = List<String>();
+    values.add("Horses");
+
+    await new Future.delayed(Duration(seconds: 2));
+
+    return values;
+  }
+
+  Widget createListView(BuildContext context, AsyncSnapshot snapshot) {
+    List<String> values = snapshot.data;
+
+    return ListView.builder(
+      itemCount: values.length,
+      itemBuilder: (BuildContext context, int index) {
+        return Column(
+          children: <Widget>[
+            ListTile(
+              title: Text(values[index]),
+            )
+          ],
+        );
+      },
     );
   }
 }
